@@ -178,6 +178,21 @@ drp_feats = ['State FIPS Code_statecode','County FIPS Code_countycode','5-digit 
 fnl_drop_df = z_score_df.drop(drp_feats,axis=1)
 
 # %%
+count = 0
+start = 0
+end = 15
+temp_df = pd.DataFrame()
+for n in fnl_drop_df:
+  if count == end:
+    temp_df['Preventable hospital stays raw value_v005_rawvalue'] = fnl_drop_df['Preventable hospital stays raw value_v005_rawvalue']
+    break
+  if n == 'Preventable hospital stays raw value_v005_rawvalue':
+    continue
+  if count >= start and count <= end-1:
+    temp_df[n] = fnl_drop_df[n]
+  count += 1
+
+fnl_drop_df = temp_df
 fnl_drop_df
 
 # %%
@@ -214,30 +229,20 @@ pre_algo = fnl_cats_frame.to_numpy()
 len(pre_algo)
 
 # %%
+rules = []
 pre_algo_list = pre_algo.tolist()
-pre_algo_list
+for j in fnl_cats_frame:
+    if j == "Preventable hospital stays raw value_v005_rawvalue":
+        rules = fnl_cats_frame[j].value_counts().index.tolist()
+print(rules)
 
 # %%
 lexico_tree = make_tree_from_data(pre_algo_list)
 lexico_tree.print_out()
  
-data_list = lexico_tree.supp_frequent_itemsets(k=1,target=["72_(3839.5, 5569.75]",      
-"72_(2109.25, 3839.5]",     
-"72_(5569.75, 7300.0]",      
-"72_(365.158, 2109.25]",     
-"72_(7300.0, 9030.25]",       
-"72_(9030.25, 10760.5]",     
-"72_(10760.5, 12490.75]",      
-"72_(12490.75, 14221.0]"])
+data_list = lexico_tree.supp_frequent_itemsets(k=1,target=rules)
 
-generate_top_10_rules(data_list[1], data_list[0],["72_(3839.5, 5569.75]",      
-"72_(2109.25, 3839.5]",     
-"72_(5569.75, 7300.0]",      
-"72_(365.158, 2109.25]",     
-"72_(7300.0, 9030.25]",       
-"72_(9030.25, 10760.5]",     
-"72_(10760.5, 12490.75]",      
-"72_(12490.75, 14221.0]"], 5)
+generate_top_10_rules(data_list[1], data_list[0],rules, 5)
 
 # %%
 count = 0
