@@ -114,19 +114,19 @@ class LexicoNode:
             count = 0
             if (numChildren == 0):
                 levelCount +=1
-                print("Current Level: ",levelCount)
-                print("Nodes on level: ",temp) 
+                #print("Current Level: ",levelCount)
+                #print("Nodes on level: ",temp) 
                 numChildren = q.qsize()
                 temp.clear()
             q.task_done()
         out_t = (dat,sups)
-        print("Type",type(out_t))
+        #print("Type",type(out_t))
         return out_t
         
     def frequent_itemsets(self, k: int): #F_k -
         return self._trav_freq(k, [])
 
-    def supp_frequent_itemsets(self, k: int,target=[None]): #F_k -
+    def supp_frequent_itemsets(self, k: int,target): #F_k -
         
         data = self.suppTravFreq(k, [])
         itms,sups = data

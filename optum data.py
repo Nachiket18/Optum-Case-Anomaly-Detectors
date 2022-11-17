@@ -4,8 +4,8 @@ from anomaly_detection import make_tree_from_data,generate_top_10_rules
 from lexicographic_tree import LexicoNode
 
 # %%
-df = pd.read_csv(r'C:\Users\Nachiket Deo\optum-competition-anomaly-detection\dataset\chr_analytic_data2022.csv',header=[0,1])
-f = open(r'C:\Users\Nachiket Deo\optum-competition-anomaly-detection\dataset\chr_analytic_data2022.csv')
+df = pd.read_csv(r'C:\Users\Nachiket Deo\Optum-Case-Anomaly-Detectors\dataset\chr_analytic_data2022.csv',header=[0,1])
+f = open(r'C:\Users\Nachiket Deo\Optum-Case-Anomaly-Detectors\dataset\chr_analytic_data2022.csv')
 lines = f.readlines()
 
 # %%
@@ -120,7 +120,7 @@ for j in drop_full:
                 index = z_score_df.columns.get_loc(j)
                 temp = drop_full[prev]/drop_full[j]
                 col_name += prev_data[1] + "_z_score"
-                z_score_df.insert(index+1, col_name, temp, True)
+                #z_score_df.insert(index+1, col_name, temp, True)
                 count += 1
         if curr_data[0] == 'denominator' or curr_data[0] == 'numerator':
             if j not in features:
@@ -179,8 +179,8 @@ fnl_drop_df = z_score_df.drop(drp_feats,axis=1)
 
 # %%
 count = 0
-start = 0
-end = 15
+start = 32
+end = 41
 temp_df = pd.DataFrame()
 for n in fnl_drop_df:
   if count == end:
@@ -236,13 +236,18 @@ for j in fnl_cats_frame:
         rules = fnl_cats_frame[j].value_counts().index.tolist()
 print(rules)
 
+print("J",j)
+
 # %%
 lexico_tree = make_tree_from_data(pre_algo_list)
-lexico_tree.print_out()
+#print(lexico_tree.data,lexico_tree.support_count)
+
+#lexico_tree.print_out()
  
 data_list = lexico_tree.supp_frequent_itemsets(k=1,target=rules)
 
-generate_top_10_rules(data_list[1], data_list[0],rules, 5)
+#print(data_list[1])
+generate_top_10_rules(data_list[1], data_list[0],rules,5)
 
 # %%
 count = 0

@@ -317,11 +317,12 @@ class transactionMapping:
         node_data = []
 
         for dt,support_c in freqent_itemset_keys.items():
-            if support_c > 2:
+            #print(dt,support_c)
+            if support_c >= 2:
                 total_support_count.append(support_c) 
                 node_data.append(dt)
        
-        #print(node_data)
+        #print("Root:",node_data,total_support_count)
         lex = LexicoNode(node_data, {}, total_support_count)
         self.depth_first_search_lexicographic_tree_build(lex, root)
 
@@ -439,41 +440,44 @@ def generate_top_10_rules(Q_itemsets:tuple,itemsets_normal:tuple, target, k:int)
     itemsets = Q_itemsets[0]
     itemsets_n = itemsets_normal[0]
     
-
+    print("Target",target)
+    
 
     for i in range(len(itemsets)):
 
         support_count__target = 0
         support_count_x = 0
-
+        
         if type(itemsets[i]) == list and itemsets[i] != target:
             temp = [x for x in itemsets[i] if x not in target]
+            trg = [x for x in itemsets[i] if x in target]
+
             #print("temp", temp, target, temp == target)
             
             for j in range(len(itemsets)):
-                if itemsets[j] == target:
+                if itemsets[j] == trg:
                     support_count__target = Q_itemsets[1][j]
 
             for j in range(len(itemsets_n)):
                 if itemsets_n[j] == temp:
                     support_count_x = itemsets_normal[1][j]
             
-            if support_count_x == 0:
+            if support_count_x == 0 or support_count__target == 0:
                 continue
 
             #print("Sup-Data", support_count_x, support_count__target)
 
             lift = (Q_itemsets[1][i]) / ((support_count_x) * (support_count__target))        
-            rule = Rule(target, temp, lift)
+            rule = Rule(trg, temp, lift)
             rules.append(rule)
     
     rules.sort(key=lambda x: x.lift, reverse=True)
-    with open(r'C:\Users\Nachiket Deo\optum-competition-anomaly-detection\output\rules.txt', 'w') as fp:
+    with open(r'C:\Users\Nachiket Deo\optum-competition-anomaly-detection\output\rules_3.txt', 'w') as fp:
         for item in rules:
         # write each item on a new line
             fp.write("%s\n" % item)
     print('Done')
-
+   
 
     #([[2, 1], [2, 4], [2, 3], [2, 1, 3]], [2, 2, 2, 2])    
 
