@@ -1,4 +1,4 @@
-# optum-competition-anomaly-detection
+# Optum-Competition-Anomaly-Detection
 Our submission to the Optum Data Science Competition, utilizing Anomaly Detection
 
 # Research Paper
