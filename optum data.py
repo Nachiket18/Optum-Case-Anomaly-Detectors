@@ -2,46 +2,19 @@
 import pandas as pd
 from anomaly_detection import make_tree_from_data,generate_top_10_rules
 from lexicographic_tree import LexicoNode
+import re
+from sklearn.preprocessing import KBinsDiscretizer
 
-# %%
+
 df = pd.read_csv(r'C:\Users\Nachiket Deo\Optum-Case-Anomaly-Detectors\dataset\chr_analytic_data2022.csv',header=[0,1])
 f = open(r'C:\Users\Nachiket Deo\Optum-Case-Anomaly-Detectors\dataset\chr_analytic_data2022.csv')
 lines = f.readlines()
 
-# %%
-# for n in range(20):
-#     arr = lines[n].split(',')
-#     print(arr)
-#     print(len(arr))
 
-# %%
 df.columns = df.columns.map('_'.join)
 
-
-# %%
 df.head()
 
-
-# %%
-df['% rural CI low_v058_cilow'].isnull().count()
-
-
-# %%
-df['% rural CI high_v058_cihigh'].isnull().count()
-
-
-# %%
-df['% female CI low_v057_cilow'].isnull().count()
-
-# %%
-df['% female CI high_v057_cihigh'].isnull().count()
-
-# %%
-# count = 0
-# for n in df:
-#     if (df[n].isnull()) == 3194:
-#         count += 1
-# print(count)
 drop_df = df
 count  = 0
 features = []
@@ -51,13 +24,8 @@ for n in df:
         print(n,df[n].isnull().sum())
         count += 1
 drop_df = df.drop(features,axis=1)
-#print(features)
-#print(count)
-
-# %%
 
 
-# %%
 from sklearn.impute import KNNImputer
 cat_features = []
 num_features = []
@@ -72,7 +40,6 @@ imputer = KNNImputer(n_neighbors=2)
 drop_df_two = imputer.fit_transform(drop_df_two)
 print(num_features)
 
-# %%
 
 drop_df_prep = pd.DataFrame(drop_df_two, columns = num_features)
 drop_full = drop_df
@@ -81,20 +48,18 @@ for f in drop_df_prep:
         print(f)
         drop_full[f] = drop_df_prep[f]
 
-# %%
+
 count = 0
 for m in drop_full:
     if drop_full[m].isnull().sum() != 0:
         count += 1
 
 
-# %%
 def check_prev(col_n):
     arr = col_n.split()
     ident = arr[-1].split('_')
     return (ident[0],ident[1])
 
-# %%
 
 prev = ""
 count = 0
@@ -103,14 +68,11 @@ col_name = ""
 z_score_df = drop_full
 features = []
 for j in drop_full:
-#     print(j)
     if prev == "":
         prev = j
     else:
         prev_data = check_prev(prev)
         curr_data = check_prev(j)
-#         print(prev_data)
-#         print(curr_data)
         if prev_data[0] == 'numerator' and curr_data[0] == 'denominator':
             for f in j.split()[:-1]:
                 col_name += f + "_"
@@ -129,55 +91,35 @@ for j in drop_full:
         prev = j
 
 
-# %%
+
 z_score_df = z_score_df.drop(features,axis=1)
 for i in z_score_df.columns:
     print(i)
 
-# %%
 z_score_df
 
-# %%
-# variable = "Premature death raw value_v001_rawvalue"
-# x = z_score_df[variable].values
-# y = z_score_df['Preventable hospital stays raw value_v005_rawvalue']
 
-# %%
-# !pip install optbinning
-
-# %%
-# optb.fit(x,y)
-
-# %%
-# binning_table = optb.binning_table.build()
-# binning_table
-
-# %%
-import re
-from sklearn.preprocessing import KBinsDiscretizer
 
 def make_bins(col_name,bin_target,num_bins):
     binned_data = pd.cut(bin_target, num_bins)
     return binned_data
 
-# %%
 def in_bin(val,lower,upper):
     if val >= lower and val <= upper:
         return True
     else:
         return False
 
-# %%
 variable = "Premature death raw value_v001_rawvalue"
 x = z_score_df[variable].values
 y = z_score_df['Preventable hospital stays raw value_v005_rawvalue']
 make_bins(variable,x,4)
 
-# %%
+
 drp_feats = ['State FIPS Code_statecode','County FIPS Code_countycode','5-digit FIPS Code_fipscode','Name_county','Release Year_year','County Ranked (Yes=1/No=0)_county_ranked']
 fnl_drop_df = z_score_df.drop(drp_feats,axis=1)
 
-# %%
+
 count = 0
 start = 32
 end = 41
@@ -195,7 +137,7 @@ for n in fnl_drop_df:
 fnl_drop_df = temp_df
 fnl_drop_df
 
-# %%
+
 target = 'Preventable hospital stays raw value_v005_rawvalue'
 cats_frame = pd.DataFrame()
 fnl_cats_frame = pd.DataFrame()
@@ -219,16 +161,16 @@ for l in cats_frame:
                     
 
 
-# %%
+
 fnl_cats_frame
 
-# %%
+
 pre_algo = fnl_cats_frame.to_numpy()
 
-# %%
+
 len(pre_algo)
 
-# %%
+
 rules = []
 pre_algo_list = pre_algo.tolist()
 for j in fnl_cats_frame:
@@ -238,25 +180,10 @@ print(rules)
 
 print("J",j)
 
-# %%
-lexico_tree = make_tree_from_data(pre_algo_list)
-#print(lexico_tree.data,lexico_tree.support_count)
 
-#lexico_tree.print_out()
- 
+lexico_tree = make_tree_from_data(pre_algo_list)
 data_list = lexico_tree.supp_frequent_itemsets(k=1,target=rules)
 
-#print(data_list[1])
 generate_top_10_rules(data_list[1], data_list[0],rules,5)
-
-# %%
-count = 0
-for i in fnl_cats_frame:
-    if count in [369,327,380,381]:
-        print(i)
-    count += 1
-
-# %%
-
 
 
